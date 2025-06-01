@@ -1,30 +1,24 @@
 from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
 import os
+from langchain.agents import initialize_agent
+from langchain_community.tools import TavilySearchResults
+
+
 load_dotenv()
 
-# Access variables
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# from google import genai
-from google import generativeai as genai
-
-# client = genai.Client(api_key=GOOGLE_API_KEY)
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-
-
-# response = client.models.generate_content(
-#     model="gemini-2.0-flash", contents="Explain how AI works"
-# )
-# print(response.text)
-
-genai.configure(api_key=GOOGLE_API_KEY)
 
 llm = ChatGoogleGenerativeAI(model = 'gemini-1.5-flash-8b')
-answer = llm.invoke('Explain  messi in one word')
-print(answer)
-# model = genai.GenerativeModel("gemini-1.5-flash")  # or "gemini-1.5-flash", etc.
+# answer = llm.invoke('Explain  messi in one word')
+# print(answer)
 
-# response = model.generate_content("Explain how AI works in one line")
-
-# print(response.text)
+search_tool = TavilySearchResults(search_depth = 'basic')
+tools = [search_tool]
+agent = initialize_agent(tools = tools,
+                         llm=llm,
+                         agent="zero-shot-react-description",
+                         verbose=True,
+                         handle_parsing_errors = True)
+agent.invoke("Give me a insta post caption for todays weather in Banglore")
